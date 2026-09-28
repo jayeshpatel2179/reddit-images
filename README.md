@@ -56,6 +56,7 @@ python main.py                      # loop forever, every 2 hours
 2. railway.com → **New Project → Deploy from GitHub repo**. It builds the `Dockerfile` (includes ffmpeg).
 3. **Variables**: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `SUBREDDIT`, `REDDIT_USER_AGENT`.
 4. **Attach a Volume at `/app/data`**. Without it the database is wiped on every redeploy and the bot forgets what it already sent.
+   Optional: `LOG_DIR=/app/data/logs` keeps the log file on the volume too (500 KB per file, last 10 copies kept; change with `LOG_MAX_KB` / `LOG_BACKUPS`).
 5. Deploy → **Logs** should show `Reddit source: public RSS feed` and `Starting loop`.
 
 To move from your private chat to the group later, change `TELEGRAM_CHAT_ID` in Railway; history stays on the volume.

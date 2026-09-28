@@ -8,6 +8,7 @@
 """
 import argparse
 import logging
+import os
 import sys
 import time
 from logging.handlers import RotatingFileHandler
@@ -29,7 +30,12 @@ def setup_logging(log_dir) -> None:
     root.setLevel(logging.INFO)
     console = logging.StreamHandler()
     console.setFormatter(fmt)
-    file = RotatingFileHandler(log_dir / "bot.log", maxBytes=2_000_000, backupCount=3, encoding="utf-8")
+    file = RotatingFileHandler(
+        log_dir / "bot.log",
+        maxBytes=int(os.getenv("LOG_MAX_KB", "500")) * 1000,
+        backupCount=int(os.getenv("LOG_BACKUPS", "10")),
+        encoding="utf-8",
+    )
     file.setFormatter(fmt)
     root.addHandler(console)
     root.addHandler(file)
