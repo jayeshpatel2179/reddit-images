@@ -57,9 +57,9 @@ def run_once(cfg: Config, source: PostSource, sender: PostSender, store: Storage
     sent = 0
 
     for post in pending:
-        if cfg.skip_text_posts and post.kind == "text":
+        if post.kind not in cfg.send_types:
             store.mark_sent(post.id, post.created_utc, status="skipped")
-            log.info("Skipped text post %s %s", post.id, post.title[:80])
+            log.info("Skipped %s post %s %s", post.kind, post.id, post.title[:80])
             continue
         try:
             sender.send(post)

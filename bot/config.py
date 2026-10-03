@@ -18,6 +18,17 @@ def _required(name: str) -> str:
     return value
 
 
+POST_TYPES = {"video", "animation", "photo", "gallery", "gallery_link", "text"}
+
+
+def _parse_send_types(value: str) -> frozenset[str]:
+    types = frozenset(t.strip().lower() for t in value.split(",") if t.strip())
+    unknown = types - POST_TYPES
+    if unknown or not types:
+        raise SystemExit(f"SEND_TYPES has unknown types {sorted(unknown)}; allowed: {', '.join(sorted(POST_TYPES))}")
+    return types
+
+
 @dataclass(frozen=True)
 class Config:
     telegram_token: str
@@ -27,7 +38,7 @@ class Config:
     reddit_client_secret: str
     reddit_user_agent: str
     reddit_source: str  # "rss" or "api"
-    skip_text_posts: bool
+    send_types: frozenset[str]  # post kinds to forward; everything else is skipped
     interval_hours: float
     first_run_lookback_hours: float
     overlap_minutes: float
@@ -57,7 +68,7 @@ def load_config(require_telegram: bool = True) -> Config:
         reddit_client_secret=_env("REDDIT_CLIENT_SECRET"),
         reddit_user_agent=_env("REDDIT_USER_AGENT", "python:reddit-telegram-forwarder:v1.0 (by /u/unknown)"),
         reddit_source=_env("REDDIT_SOURCE", "rss").lower(),
-        skip_text_posts=_env("SKIP_TEXT_POSTS", "true").lower() in ("1", "true", "yes"),
+        send_types=_parse_send_types(_env("SEND_TYPES", "video")),
         interval_hours=float(_env("INTERVAL_HOURS", "2")),
         first_run_lookback_hours=float(_env("FIRST_RUN_LOOKBACK_HOURS", "2")),
         overlap_minutes=float(_env("OVERLAP_MINUTES", "60")),

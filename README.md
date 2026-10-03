@@ -14,7 +14,7 @@ Every 2 hours it reads new posts from r/EASportsFC through Reddit's public **RSS
 | Gallery | title + "Gallery post" note + Reddit link (RSS doesn't list gallery images) |
 | External link (YouTube, etc.) | title + link with preview |
 
-With `SKIP_TEXT_POSTS=true` (the default), plain text posts and external-link posts are skipped (recorded as `skipped`, never sent). Set it to `false` to send them too.
+`SEND_TYPES` picks what gets forwarded (default `video`: only Reddit videos, everything else is recorded as `skipped` and never sent). Example: `SEND_TYPES=video,animation,photo,gallery` for all media.
 
 Every message ends with the author and a **View on Reddit** link. If media fails to send, the post falls back to a text message, so nothing is silently skipped.
 
