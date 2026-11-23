@@ -88,5 +88,12 @@ def parse_post(post: dict) -> ParsedPost:
         parsed.kind = "video"
         parsed.items.append(MediaItem("video", rv["fallback_url"]))
         parsed.dash_url = rv.get("dash_url")
+    elif url.lower().startswith("https://v.redd.it/"):
+        # Archived right after posting, before Reddit finished processing the video:
+        # the media block is still empty, but the standard playlist URLs work.
+        base = url.split("?")[0].rstrip("/")
+        parsed.kind = "video"
+        parsed.items.append(MediaItem("video", f"{base}/HLSPlaylist.m3u8"))
+        parsed.dash_url = f"{base}/DASHPlaylist.mpd"
 
     return parsed

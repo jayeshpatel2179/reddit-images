@@ -1,6 +1,6 @@
 # r/GTA6unmoderated → Telegram bot
 
-Every 2 hours it reads new posts from r/GTA6unmoderated through Reddit's public **RSS feed** (no Reddit API key needed) and sends them to a Telegram chat or group. No duplicates, no missed posts.
+Every 2 hours it reads new posts from r/GTA6unmoderated through **Arctic Shift**, a public Reddit archive that copies posts within about a minute (no Reddit API key needed; Reddit shut down its public RSS feeds in November 2026) and sends them to a Telegram chat or group. No duplicates, no missed posts.
 
 ## What gets sent
 
@@ -11,7 +11,7 @@ Every 2 hours it reads new posts from r/GTA6unmoderated through Reddit's public 
 | GIF | animation |
 | Text post | title + body text |
 | Text post with pasted images | photo / album + title + body excerpt |
-| Gallery | title + "Gallery post" note + Reddit link (RSS doesn't list gallery images) |
+| Gallery | photo album + title |
 | External link (YouTube, etc.) | title + link with preview |
 
 `SEND_TYPES` picks what gets forwarded (default `video`: only Reddit videos, everything else is recorded as `skipped` and never sent). Example: `SEND_TYPES=video,animation,photo,gallery` for all media.
@@ -21,12 +21,14 @@ Every message ends with the author and a **View on Reddit** link. If media fails
 ## How it works
 
 1. Reads the checkpoint (time of the last successful run) from `data/state.db`.
-2. One request to `https://www.reddit.com/r/GTA6unmoderated/new/.rss?limit=100`. 100 posts cover roughly a day on this subreddit, so 2-hour runs never miss anything. If needed it pages further (max 3 requests, 15 s apart).
+2. Asks Arctic Shift (`arctic-shift.photon-reddit.com/api/posts/search`) for every post since the checkpoint, 100 per request, oldest first, paging until it has them all (max 20 requests, 2 s apart).
 3. Keeps posts newer than `checkpoint - 60 min` and skips every post id already in `sent_posts`. First run: last 2 hours only.
 4. Sends oldest → newest, 3.5 s apart (Telegram allows ~20 msgs/min per group).
 5. Saves each post id right after Telegram confirms, then moves the checkpoint.
 
-**Rate limits:** the RSS feed returns `429` after ~5 quick requests. The bot makes 1 request per run (12/day), waits ≥15 s between requests and backs off on 429.
+**Rate limits:** a busy 2-hour window is ~3-4 requests. The bot waits ≥2 s between requests and backs off on `429`.
+
+**Caveat:** Arctic Shift is a third-party service, not Reddit. If it goes down or falls behind, runs fail and retry next interval; nothing is lost while the checkpoint stays put.
 
 ## Step 1: Telegram bot token
 
@@ -57,11 +59,10 @@ python main.py                      # loop forever, every 2 hours
 3. **Variables**: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `SUBREDDIT`, `REDDIT_USER_AGENT`.
 4. **Attach a Volume at `/app/data`**. Without it the database is wiped on every redeploy and the bot forgets what it already sent.
    Optional: `LOG_DIR=/app/data/logs` keeps the log file on the volume too (500 KB per file, last 10 copies kept; change with `LOG_MAX_KB` / `LOG_BACKUPS`).
-5. Deploy → **Logs** should show `Reddit source: public RSS feed` and `Starting loop`.
+5. Deploy → **Logs** should show `Reddit source: Arctic Shift archive` and `Starting loop`.
 
 To move from your private chat to the group later, change `TELEGRAM_CHAT_ID` in Railway; history stays on the volume.
 
-If the logs show `Reddit blocked the RSS feed (403)`, Reddit is blocking Railway's IP range. Run the bot from a home machine instead, or switch to the API (below).
 
 ## Optional: official API mode
 
@@ -72,7 +73,8 @@ If Reddit ever approves an API application for you (reddit.com/prefs/apps; appro
 ```
 main.py                 entry point + CLI flags (--once, --dry-run, --chat-id, --test)
 bot/config.py           settings from environment / .env
-bot/rss_client.py       RSS reader + parser (default source)
+bot/arctic_client.py    Arctic Shift reader (default source)
+bot/rss_client.py       old RSS reader (unused: Reddit removed RSS in Nov 2026)
 bot/reddit_client.py    official API reader (optional source)
 bot/media.py            post model + API post parser
 bot/downloader.py       file + Reddit video download (yt-dlp + ffmpeg)

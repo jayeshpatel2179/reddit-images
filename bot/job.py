@@ -11,7 +11,7 @@ from typing import Protocol
 from .config import Config
 from .media import ParsedPost
 from .reddit_client import RedditClient
-from .rss_client import RssClient
+from .arctic_client import ArcticShiftClient
 from .sender import PostSender
 from .storage import Storage
 from .telegram_client import TelegramUnavailable
@@ -31,8 +31,10 @@ def make_source(cfg: Config) -> PostSource:
             raise SystemExit("REDDIT_SOURCE=api needs REDDIT_CLIENT_ID and REDDIT_CLIENT_SECRET")
         log.info("Reddit source: official API (OAuth, 100 req/min)")
         return RedditClient(cfg.reddit_client_id, cfg.reddit_client_secret, cfg.reddit_user_agent)
-    log.info("Reddit source: public RSS feed")
-    return RssClient(cfg.reddit_user_agent)
+    if cfg.reddit_source == "rss":
+        log.warning("Reddit shut down its RSS feeds in Nov 2026; using Arctic Shift instead")
+    log.info("Reddit source: Arctic Shift archive (no key needed)")
+    return ArcticShiftClient(cfg.reddit_user_agent)
 
 
 def fetch_pending(cfg: Config, source: PostSource, store: Storage) -> tuple[list[ParsedPost], float]:

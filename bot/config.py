@@ -37,7 +37,7 @@ class Config:
     reddit_client_id: str
     reddit_client_secret: str
     reddit_user_agent: str
-    reddit_source: str  # "rss" or "api"
+    reddit_source: str  # "arctic" (default), "api"; "rss" is dead and falls back to arctic
     send_types: frozenset[str]  # post kinds to forward; everything else is skipped
     interval_hours: float
     first_run_lookback_hours: float
@@ -67,7 +67,7 @@ def load_config(require_telegram: bool = True) -> Config:
         reddit_client_id=_env("REDDIT_CLIENT_ID"),
         reddit_client_secret=_env("REDDIT_CLIENT_SECRET"),
         reddit_user_agent=_env("REDDIT_USER_AGENT", "python:reddit-telegram-forwarder:v1.0 (by /u/unknown)"),
-        reddit_source=_env("REDDIT_SOURCE", "rss").lower(),
+        reddit_source=_env("REDDIT_SOURCE", "arctic").lower(),
         send_types=_parse_send_types(_env("SEND_TYPES", "video")),
         interval_hours=float(_env("INTERVAL_HOURS", "2")),
         first_run_lookback_hours=float(_env("FIRST_RUN_LOOKBACK_HOURS", "2")),
