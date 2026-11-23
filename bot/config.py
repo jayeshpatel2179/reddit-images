@@ -63,7 +63,7 @@ def load_config(require_telegram: bool = True) -> Config:
     return Config(
         telegram_token=_required("TELEGRAM_BOT_TOKEN") if require_telegram else _env("TELEGRAM_BOT_TOKEN"),
         telegram_chat_id=_required("TELEGRAM_CHAT_ID") if require_telegram else _env("TELEGRAM_CHAT_ID"),
-        subreddit=_env("SUBREDDIT", "EASportsFC").removeprefix("r/"),
+        subreddit=_env("SUBREDDIT", "GTA6unmoderated").removeprefix("r/"),
         reddit_client_id=_env("REDDIT_CLIENT_ID"),
         reddit_client_secret=_env("REDDIT_CLIENT_SECRET"),
         reddit_user_agent=_env("REDDIT_USER_AGENT", "python:reddit-telegram-forwarder:v1.0 (by /u/unknown)"),

@@ -1,6 +1,6 @@
-# r/EASportsFC → Telegram bot
+# r/GTA6unmoderated → Telegram bot
 
-Every 2 hours it reads new posts from r/EASportsFC through Reddit's public **RSS feed** (no Reddit API key needed) and sends them to a Telegram chat or group. No duplicates, no missed posts.
+Every 2 hours it reads new posts from r/GTA6unmoderated through Reddit's public **RSS feed** (no Reddit API key needed) and sends them to a Telegram chat or group. No duplicates, no missed posts.
 
 ## What gets sent
 
@@ -21,7 +21,7 @@ Every message ends with the author and a **View on Reddit** link. If media fails
 ## How it works
 
 1. Reads the checkpoint (time of the last successful run) from `data/state.db`.
-2. One request to `https://www.reddit.com/r/EASportsFC/new/.rss?limit=100`. 100 posts cover roughly a day on this subreddit, so 2-hour runs never miss anything. If needed it pages further (max 3 requests, 15 s apart).
+2. One request to `https://www.reddit.com/r/GTA6unmoderated/new/.rss?limit=100`. 100 posts cover roughly a day on this subreddit, so 2-hour runs never miss anything. If needed it pages further (max 3 requests, 15 s apart).
 3. Keeps posts newer than `checkpoint - 60 min` and skips every post id already in `sent_posts`. First run: last 2 hours only.
 4. Sends oldest → newest, 3.5 s apart (Telegram allows ~20 msgs/min per group).
 5. Saves each post id right after Telegram confirms, then moves the checkpoint.
